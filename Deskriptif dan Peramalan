@@ -1,0 +1,163 @@
+library(dplyr)
+# Memasukkan data dari csv
+data <- read.csv(file ='Data HistOris BBCA.csv',fileEncoding= "UTF-8-BOM", na.strings = '..')
+data_BBCA <- data.frame(data)
+View(data_BBCA)
+
+# Rangkuman data
+names(data_BBCA)
+summary(data_BBCA)
+
+# Memilih nama Values kolom yang Diinginkan
+data_BBCA <- dplyr::select(data_BBCA, Tanggal,Terakhir)
+View(data_BBCA)
+
+# Mengubah Format tanggal
+data_BBCA$Tanggal <- strptime(as.character(data_BBCA$Tanggal), "%d/%m/%Y")
+format(data_BBCA$Tanggal, "%Y-%m-%d")
+data_BBCA$Tanggal <- as.Date(data_BBCA$Tanggal)
+View(data_BBCA)
+
+#Plot Data Kolom Terakhir
+library(ggplot2)
+plot_Daily_Closing_Price <- ggplot(data_BBCA, aes(x=Tanggal, y=Terakhir)) +
+  geom_line() + 
+  xlab("")
+plot_Daily_Closing_Price
+
+#Plot Data
+plot(data_BBCA, type="l")
+
+#Plot ACF dan PACF untuk melihat kestasioneran data
+data_BBCA <- ts(data_BBCA)
+is.ts(data_BBCA)
+acf(data_BBCA)
+pacf(data_BBCA)
+
+#Uji Stasioner
+library(tseries)
+adf.test(data_BBCA)
+
+#Differencing
+differencing <-diff(data_BBCA, differences = 1)
+differencing
+plot(differencing, type="l")
+
+#Plot ACF dan PACF data setelah differencing
+acf(differencing)
+pacf(differencing)
+library(TSA)
+eacf(differencing)
+
+#Uji Stasioner setelah differencing
+adf.test(differencing)
+
+#Pendugaan Parameter
+library(tseries)
+library(forecast)
+library(portes)
+library(fpp2)
+# ARIMA (0,1,0)
+model1 <- Arima(differencing, order = c(0,1,0))
+model1
+
+# ARIMA (0,1,2)
+model2 <- Arima(differencing, order = c(0,1,2))
+model2
+
+# ARIMA (0,1,3)
+model3 <- Arima(differencing, order = c(0,1,3))
+model3
+
+# ARIMA (1,1,0)
+model4 <- Arima(differencing, order = c(1,1,0))
+model4
+
+# ARIMA (1,1,1)
+model5 <- Arima(differencing, order = c(1,1,1))
+model5
+
+# ARIMA (1,1,3)
+model6 <- Arima(differencing, order = c(1,1,3))
+model6
+
+# ARIMA (2,1,0)
+model7 <- Arima(differencing, order = c(2,1,0))
+model7
+
+# ARIMA (2,1,1)
+model8 <- Arima(differencing, order = c(0,1,1))
+model8
+
+# ARIMA (2,1,2)
+model9 <- Arima(differencing, order = c(2,1,2))
+model9
+
+# ARIMA (2,1,3)
+model10 <- Arima(differencing, order = c(2,1,3))
+model10
+
+# ARIMA (3,1,0)
+model11 <- Arima(differencing, order = c(3,1,0))
+model11
+
+# ARIMA (3,1,1)
+model12 <- Arima(differencing, order = c(3,1,1))
+model12
+
+# ARIMA (3,1,2)
+model13 <- Arima(differencing, order = c(3,1,2))
+model13
+
+# ARIMA (3,1,3)
+model14 <- Arima(differencing, order = c(3,1,3))
+model14
+
+#Diagnostik Model(1)
+#1. Uji Signifikan Parameter
+library(lmtest)
+library(normtest)
+library(nortest)
+coeftest(model1)
+coeftest(model2)
+coeftest(model3)
+coeftest(model4)
+coeftest(model5)
+coeftest(model6)
+coeftest(model7)
+coeftest(model8)
+coeftest(model9)
+coeftest(model10)
+coeftest(model11)
+coeftest(model12)
+coeftest(model13)
+coeftest(model14)
+
+#2. Uji White Noise
+ljbtest1 <- LjungBox(residuals(model1),lags=seq(6,30,6),order=0,squared.residuals=FALSE)
+ljbtest1
+
+ljbtest4 <- LjungBox(residuals(model4),lags=seq(6,30,6),order=0,squared.residuals=FALSE)
+ljbtest4
+
+ljbtest7 <- LjungBox(residuals(model7),lags=seq(6,30,6),order=0,squared.residuals=FALSE)
+ljbtest7
+
+ljbtest8 <- LjungBox(residuals(model8),lags=seq(6,30,6),order=0,squared.residuals=FALSE)
+ljbtest8
+
+ljbtest11 <- LjungBox(residuals(model11),lags=seq(6,30,6),order=0,squared.residuals=FALSE)
+ljbtest11
+
+#3. Uji Normalitas Residual 
+library(LambertW)
+ks.test.t(model8$residuals)
+ks.test.t(model10$residuals)
+
+#Nilai MSE
+MSE1 = mean(model8$residuals^2)
+MSE2 = mean(model10$residuals^2)
+
+#Peramalan
+forecast(Arima(data_BBCA, order = c(2,1,3)), h=30)
+plot(forecast)
