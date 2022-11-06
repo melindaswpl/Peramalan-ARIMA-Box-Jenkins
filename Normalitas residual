@@ -1,0 +1,3 @@
+library(LambertW)
+ks.test.t(model8$residuals)
+ks.test.t(model10$residuals)
