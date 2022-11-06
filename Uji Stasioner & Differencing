@@ -1,8 +1,0 @@
-#Uji Stasioner
-library(tseries)
-adf.test(data_BBCA)
-
-#Differencing
-differencing <-diff(data_BBCA, differences = 1)
-differencing
-plot(differencing, type="l")
